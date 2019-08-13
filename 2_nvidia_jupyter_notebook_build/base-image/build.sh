@@ -13,6 +13,6 @@ oc process -f docker-build-template.yml \
     -p APPLICATION_NAME=${APP} \
     -p SOURCE_REPOSITORY_URL=${GIT_URL} \
     -p SOURCE_REPOSITORY_REF=master \
-    -p DOCKERFILE_PATH=nvidia-notebook/base-image \
+    -p DOCKERFILE_PATH=2_nvidia_jupyter_notebook_build/base-image \
     -p DOCKERFILE_NAME=Dockerfile-py36.nvidia \
     | oc apply -n ${PROJECT} -f -

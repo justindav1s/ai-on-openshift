@@ -15,12 +15,6 @@ done
 
 cd templates
 
-#oc new-app jupyterhub.yaml
-
-# oc new-app jupyterhub-original.yaml \
-#    -p NOTEBOOK_REPOSITORY_URL=https://github.com/justindav1s/ai-on-openshift \
-#    -p NOTEBOOK_REPOSITORY_CONTEXT_DIR=nvidia-notebook/tensorflow-notebook \
-#    -p NOTEBOOK_PYTHON_VERSION='3.6'
 
 oc new-app jupyterhub.yaml \
    -p NOTEBOOK_REPOSITORY_URL=https://github.com/justindav1s/ai-on-openshift \
