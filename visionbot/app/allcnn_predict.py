@@ -7,7 +7,8 @@ from PIL import Image
 import h5py
 from urllib.request import urlopen
 import tensorflow as tf
-tf.logging.set_verbosity(tf.logging.ERROR)
+
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 model_json= "https://jndfiles-pub.s3-eu-west-1.amazonaws.com/models/allcnn_90_model.json"
 model_weights= "https://jndfiles-pub.s3-eu-west-1.amazonaws.com/models/allcnn_90_weights.hdf5"

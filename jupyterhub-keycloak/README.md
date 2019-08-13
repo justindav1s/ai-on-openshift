@@ -39,6 +39,7 @@ KeyCloak will be deployed, with JupyterHub and KeyCloak automatically configured
 
 
 ```
+kind: ConfigMap
 apiVersion: v1
 data:
   admin_users.txt: ''
@@ -52,16 +53,8 @@ data:
 
     c.KubeSpawner.extra_resource_limits = {'nvidia.com/gpu': '1'}
   user_whitelist.txt: ''
-kind: ConfigMap
 metadata:
-  annotations:
-    openshift.io/generated-by: OpenShiftNewApp
-  creationTimestamp: '2019-07-28T12:03:52Z'
   labels:
     app: jupyterhub
   name: jupyterhub-cfg
-  namespace: jupyterhub-keycloak2
-  resourceVersion: '1538167'
-  selfLink: /api/v1/namespaces/jupyterhub-keycloak2/configmaps/jupyterhub-cfg
-  uid: c4050f2a-b12f-11e9-a238-309c235ef316
 ```
