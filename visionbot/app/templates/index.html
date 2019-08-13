@@ -1,0 +1,12 @@
+
+<h1>Vision Bot</h1>
+<form action="" method="post" name="index">
+    {{ form.hidden_tag() }}
+    <p>
+        Enter an image URL<br>
+        {{ form.query(size=100) }}
+    </p>
+    <p><input type="submit" value="Analyse"></p>
+</form>
+<p/><img src="{{ image.url }}"/>
+<p/><h3>{{ image.classification }}</h3>

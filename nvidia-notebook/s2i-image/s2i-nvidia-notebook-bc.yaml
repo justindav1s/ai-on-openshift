@@ -1,0 +1,77 @@
+kind: Template
+apiVersion: v1
+metadata:
+  annotations:
+    description: An OpenShift template to build Docker images
+    tags: instant-app
+  name: s2i-docker-build-template
+objects:
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+    name: ${APPLICATION_NAME}
+  spec:
+    tags:
+      - annotations:
+          tags: ${APPLICATION_NAME}
+        from:
+          kind: DockerImage
+          name: ${APPLICATION_NAME}:latest
+        importPolicy: {}
+        name: latest
+
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    name: ${APPLICATION_NAME}-bc
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
+    postCommit: {}
+    runPolicy: Serial
+    source:
+      contextDir: ${REPO_PATH}
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: ${BASE_IMAGE}
+          namespace: ${BASE_IMAGE_NS}
+      type: Source
+
+parameters:
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: s2i-nvidia-notebook
+- description: Git source URI for application
+  name: SOURCE_REPOSITORY_URL
+  value: "https://github.com/justindav1s/ai-on-openshift.git"
+  required: true
+- description: Git branch/tag reference
+  name: SOURCE_REPOSITORY_REF
+  value: "master"
+  required: false
+- name: REPO_PATH
+  displayName: Repository path od build content
+  description: Repository path od build content.
+  value: "nvidia-notebook/minimal-notebook"
+  required: false
+- name: BASE_IMAGE
+  displayName: Base Image
+  description: Base Image.
+  value: "python-36-centos7-nvidia:latest"
+  required: true
+- name: BASE_IMAGE_NS
+  displayName: Base Image Namespace
+  description: Base Image Namespce.
+  value: "jupyter-notebooks"
+  required: true

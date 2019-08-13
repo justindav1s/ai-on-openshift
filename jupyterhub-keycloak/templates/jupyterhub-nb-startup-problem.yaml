@@ -1,0 +1,644 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: jupyterhub
+  annotations:
+    openshift.io/display-name: JupyterHub (KeyCloak)
+    iconClass: icon-python
+    tags: python,jupyter
+parameters:
+- name: APPLICATION_NAME
+  value: jupyterhub
+  required: true
+- name: KEYCLOAK_NAME
+  value: keycloak
+  required: true
+- name: NOTEBOOK_IMAGE
+  value: docker-registry.default.svc:5000/jupyter-notebooks/tensorflow-nvidia-notebook:latest
+  required: true
+- name: JUPYTERLAB_ENABLED
+  value: 'true'
+- name: JUPYTERHUB_ADMIN_USERS
+  value: ''
+  required: false
+- name: JUPYTERHUB_ENROLLED_USERS
+  value: ''
+  required: false
+- name: JUPYTERHUB_IDLE_TIMEOUT
+  value: '3600'
+- name: POSTGRESQL_VOLUME_SIZE
+  value: 1Gi
+  required: true
+- name: KEYCLOAK_VOLUME_SIZE
+  value: 1Gi
+  required: true
+- name: NOTEBOOK_VOLUME_SIZE
+  value: 1Gi
+  required: true
+- name: NOTEBOOK_MEMORY
+  value: 1Gi
+  required: true
+- name: JUPYTERHUB_CONFIG
+  value: ''
+  required: false
+- name: KEYCLOAK_USER
+  generate: expression
+  from: "[a-zA-Z0-9]{8}"
+  required: true
+- name: KEYCLOAK_PASSWORD
+  generate: expression
+  from: "[a-zA-Z0-9]{16}"
+  required: true
+- name: DATABASE_PASSWORD
+  generate: expression
+  from: "[a-zA-Z0-9]{16}"
+  required: true
+- name: COOKIE_SECRET
+  generate: expression
+  from: "[a-f0-9]{32}"
+  required: true
+- name: OAUTH_CLIENT_SECRET
+  generate: expression
+  from: "[a-f0-9]{32}"
+  required: true
+objects:
+
+# Jupyterhub configmap
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-cfg"
+    labels:
+      app: "${APPLICATION_NAME}"
+  data:
+    jupyterhub_config.py: "${JUPYTERHUB_CONFIG}"
+    admin_users.txt: "${JUPYTERHUB_ADMIN_USERS}"
+    user_whitelist.txt: "${JUPYTERHUB_ENROLLED_USERS}"
+
+# Jupyterhub ServiceAccount
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-hub"
+    labels:
+      app: "${APPLICATION_NAME}"
+
+# Jupyterhub ServiceAccount edit role
+- kind: RoleBinding
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-edit"
+    labels:
+      app: "${APPLICATION_NAME}"
+  subjects:
+  - kind: ServiceAccount
+    name: "${APPLICATION_NAME}-hub"
+  roleRef:
+    name: edit
+
+# Jupyterhub s2i ImageStream
+- kind: ImageStream
+  apiVersion: image.openshift.io/v1
+  metadata:
+    name: "${APPLICATION_NAME}-hub-s2i"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    lookupPolicy:
+      local: true
+    tags:
+    - name: 3.1.0
+      from:
+        kind: DockerImage
+        name: quay.io/jupyteronopenshift/jupyterhub:3.1.0
+
+# Jupyterhub ImageStream
+- kind: ImageStream
+  apiVersion: image.openshift.io/v1
+  metadata:
+    name: "${APPLICATION_NAME}-hub-img"
+    labels:
+      app: "${APPLICATION_NAME}"
+
+# Jupyterhub BuildConfig
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-hub-img"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+    source:
+      type: Git
+      git:
+        uri: https://github.com/jupyter-on-openshift/poc-hub-keycloak-auth.git
+      contextDir: jupyterhub
+    strategy:
+      type: Source
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: "${APPLICATION_NAME}-hub-s2i:3.1.0"
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "${APPLICATION_NAME}-hub-img:latest"
+
+# Postgrsql db passwd secret
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: "${APPLICATION_NAME}-pgsql"
+    labels:
+      app: "${APPLICATION_NAME}"
+  stringData:
+    password: "${DATABASE_PASSWORD}"
+
+# Jupyterhub DeploymentConfig
+- kind: DeploymentConfig
+  apiVersion: apps.openshift.io/v1
+  metadata:
+    name: "${APPLICATION_NAME}"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    strategy:
+      type: Recreate
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - wait-for-database
+        - jupyterhub
+        from:
+          kind: ImageStreamTag
+          name: "${APPLICATION_NAME}-hub-img:latest"
+    replicas: 1
+    selector:
+      app: "${APPLICATION_NAME}"
+      deploymentconfig: "${APPLICATION_NAME}"
+    template:
+      metadata:
+        labels:
+          app: "${APPLICATION_NAME}"
+          deploymentconfig: "${APPLICATION_NAME}"
+      spec:
+        serviceAccountName: "${APPLICATION_NAME}-hub"
+        initContainers:
+        - name: wait-for-database
+          image: "${JUPYTERHUB_IMAGE}"
+          command:
+          - wait-for-database
+          env:
+          - name: JUPYTERHUB_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "${APPLICATION_NAME}-pgsql"
+                key: password
+          - name: JUPYTERHUB_DATABASE_HOST
+            value: "${APPLICATION_NAME}-db"
+        containers:
+        - name: jupyterhub
+          image: "${JUPYTERHUB_IMAGE}"
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          env:
+          - name: APPLICATION_NAME
+            value: "${APPLICATION_NAME}"
+          - name: KEYCLOAK_SERVICE_NAME
+            value: "${KEYCLOAK_NAME}"
+          - name: KEYCLOAK_REALM
+            value: jupyterhub
+          - name: OAUTH_CLIENT_ID
+            value: jupyterhub
+          - name: OAUTH_CLIENT_SECRET
+            value: "${OAUTH_CLIENT_SECRET}"
+          - name: JUPYTERHUB_NOTEBOOK_IMAGE
+            value: "${NOTEBOOK_IMAGE}"
+          - name: JUPYTERHUB_IDLE_TIMEOUT
+            value: "${JUPYTERHUB_IDLE_TIMEOUT}"
+          - name: JUPYTERHUB_ENABLE_LAB
+            value: "${JUPYTERLAB_ENABLED}"
+          - name: JUPYTERHUB_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "${APPLICATION_NAME}-pgsql"
+                key: password
+          - name: JUPYTERHUB_DATABASE_HOST
+            value: "${APPLICATION_NAME}-db"
+          - name: JUPYTERHUB_COOKIE_SECRET
+            value: "${COOKIE_SECRET}"
+          - name: NOTEBOOK_VOLUME_SIZE
+            value: "${NOTEBOOK_VOLUME_SIZE}"
+          volumeMounts:
+          - name: config
+            mountPath: "/opt/app-root/configs"
+        volumes:
+        - name: config
+          configMap:
+            name: "${APPLICATION_NAME}-cfg"
+            defaultMode: 420
+
+# Jupyterhub Service
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    ports:
+    - name: 8080-tcp
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: 8081-tcp
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+    selector:
+      app: "${APPLICATION_NAME}"
+      deploymentconfig: "${APPLICATION_NAME}"
+
+# Jupyterhub Route
+- kind: Route
+  apiVersion: route.openshift.io/v1
+  metadata:
+    name: "${APPLICATION_NAME}"
+    labels:
+      app: "${APPLICATION_NAME}"
+    annotations:
+      haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains
+  spec:
+    host: ''
+    to:
+      kind: Service
+      name: "${APPLICATION_NAME}"
+      weight: 100
+    port:
+      targetPort: 8080-tcp
+    tls:
+      termination: edge
+
+# Postgrsql db PersistentVolumeClaim
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-db"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "${POSTGRESQL_VOLUME_SIZE}"
+
+# Postgrsql db DeploymentConfig
+- kind: DeploymentConfig
+  apiVersion: apps.openshift.io/v1
+  metadata:
+    name: "${APPLICATION_NAME}-db"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    replicas: 1
+    selector:
+      app: "${APPLICATION_NAME}"
+      deploymentconfig: "${APPLICATION_NAME}-db"
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: "${APPLICATION_NAME}"
+          deploymentconfig: "${APPLICATION_NAME}-db"
+      spec:
+        containers:
+        - name: postgresql
+          env:
+          - name: POSTGRESQL_USER
+            value: jupyterhub
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "${APPLICATION_NAME}-pgsql"
+                key: password
+          - name: POSTGRESQL_DATABASE
+            value: jupyterhub
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - "/bin/sh"
+              - "-i"
+              - "-c"
+              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c
+                'SELECT 1'
+          volumeMounts:
+          - mountPath: "/var/lib/pgsql/data"
+            name: data
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: "${APPLICATION_NAME}-db"
+        - name: config
+          configMap:
+            name: "${APPLICATION_NAME}-cfg"
+            defaultMode: 420
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:9.6
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+
+# Postgrsql db Service
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-db"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    ports:
+    - name: 5432-tcp
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+    selector:
+      app: "${APPLICATION_NAME}"
+      deploymentconfig: "${APPLICATION_NAME}-db"
+
+# Keycloak s2i base image stream jboss/keycloak-openshift:4.0.0.Final
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: "${KEYCLOAK_NAME}-s2i"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    tags:
+    - name: latest
+      from:
+        kind: DockerImage
+        name: jboss/keycloak-openshift:4.0.0.Final
+
+# Keycloak image stream
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: "${KEYCLOAK_NAME}-img"
+    labels:
+      app: "${APPLICATION_NAME}"
+
+# Keycloak image stream
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: "${KEYCLOAK_NAME}-img"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+    source:
+      type: Git
+      git:
+        uri: https://github.com/justindav1s/ai-on-openshift.git
+      contextDir: jupyterhub-keycloak/keycloak
+    strategy:
+      type: Source
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: "${KEYCLOAK_NAME}-s2i:latest"
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "${KEYCLOAK_NAME}-img:latest"
+
+# Keycloak DeploymentConfig
+- kind: DeploymentConfig
+  apiVersion: apps.openshift.io/v1
+  metadata:
+    name: "${KEYCLOAK_NAME}"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    strategy:
+      type: Recreate
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - keycloak
+        from:
+          kind: ImageStreamTag
+          name: "${KEYCLOAK_NAME}-img:latest"
+      type: ImageChange
+    - type: ConfigChange
+    replicas: 1
+    selector:
+      app: "${APPLICATION_NAME}"
+      deploymentconfig: "${KEYCLOAK_NAME}"
+    template:
+      metadata:
+        name: "${KEYCLOAK_NAME}"
+        labels:
+          app: "${APPLICATION_NAME}"
+          deploymentconfig: "${KEYCLOAK_NAME}"
+      spec:
+        serviceAccountName: "${APPLICATION_NAME}-hub"
+        containers:
+        - name: keycloak
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8443
+            protocol: TCP
+          resources:
+            limits:
+              memory: 1Gi
+          env:
+          - name: JUPYTERHUB_SERVICE_NAME
+            value: "${APPLICATION_NAME}"
+          - name: OAUTH_CLIENT_SECRET
+            value: "${OAUTH_CLIENT_SECRET}"
+          - name: KEYCLOAK_USER
+            value: "${KEYCLOAK_USER}"
+          - name: KEYCLOAK_PASSWORD
+            value: "${KEYCLOAK_PASSWORD}"
+          - name: DB_VENDOR
+            value: postgres
+          - name: DB_ADDR
+            value: "${KEYCLOAK_NAME}-db"
+          - name: DB_PORT
+            value: '5432'
+          - name: DB_DATABASE
+            value: keycloak
+          - name: DB_USER
+            value: keycloak
+          - name: DB_PASSWORD
+            value: "${DATABASE_PASSWORD}"
+          - name: PROXY_ADDRESS_FORWARDING
+            value: 'true'
+
+# Keycloak Service
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: "${KEYCLOAK_NAME}"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    ports:
+    - name: 8080-tcp
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: 8443-tcp
+      protocol: TCP
+      port: 8443
+      targetPort: 8443
+    selector:
+      app: "${APPLICATION_NAME}"
+      deploymentconfig: "${KEYCLOAK_NAME}"
+
+# Keycloak Route
+- kind: Route
+  apiVersion: route.openshift.io/v1
+  metadata:
+    name: "${KEYCLOAK_NAME}"
+    labels:
+      app: "${APPLICATION_NAME}"
+    annotations:
+      haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains
+  spec:
+    host: ''
+    to:
+      kind: Service
+      name: "${KEYCLOAK_NAME}"
+      weight: 100
+    port:
+      targetPort: 8080-tcp
+    tls:
+      termination: edge
+
+# Keycloak DB PVC
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: "${KEYCLOAK_NAME}-db"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "${KEYCLOAK_VOLUME_SIZE}"
+
+# Keycloak DB DeploymentConfig
+- kind: DeploymentConfig
+  apiVersion: apps.openshift.io/v1
+  metadata:
+    name: "${KEYCLOAK_NAME}-db"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    replicas: 1
+    selector:
+      app: "${APPLICATION_NAME}"
+      deploymentconfig: "${KEYCLOAK_NAME}-db"
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: "${APPLICATION_NAME}"
+          deploymentconfig: "${KEYCLOAK_NAME}-db"
+      spec:
+        containers:
+        - name: postgresql
+          env:
+          - name: POSTGRESQL_USER
+            value: keycloak
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "${APPLICATION_NAME}-pgsql"
+                key: password
+          - name: POSTGRESQL_DATABASE
+            value: keycloak
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - "/bin/sh"
+              - "-i"
+              - "-c"
+              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c
+                'SELECT 1'
+          volumeMounts:
+          - mountPath: "/var/lib/pgsql/data"
+            name: data
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: "${KEYCLOAK_NAME}-db"
+        - name: config
+          configMap:
+            name: "${APPLICATION_NAME}-cfg"
+            defaultMode: 420
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:9.6
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+
+# Keycloak DB Service
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: "${KEYCLOAK_NAME}-db"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    ports:
+    - name: 5432-tcp
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+    selector:
+      app: "${APPLICATION_NAME}"
+      deploymentconfig: "${KEYCLOAK_NAME}-db"

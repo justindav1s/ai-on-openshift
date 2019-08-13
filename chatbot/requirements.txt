@@ -1,0 +1,8 @@
+Flask==0.12.2
+Flask-WTF==0.14.2
+nltk==3.2.5
+tensorflow==1.4.0
+tensorflow-tensorboard==0.4.0rc2
+tflearn==0.3.2
+WTForms==2.1
+
