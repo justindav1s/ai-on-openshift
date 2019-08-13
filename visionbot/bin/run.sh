@@ -1,17 +1,18 @@
 #!/bin/bash
-export IP=127.0.0.1
+export IP=ocp.datr.eu
 export USER=justin
-export PROJECT=tensorflow2
+export PROJECT=visionbot
 export IMAGE_NAMESPACE=$PROJECT
 export IMAGE=tfchatbot
 
-oc login ${IP}:8443 -u system:admin
-oc adm policy add-cluster-role-to-user cluster-admin $USER
+oc login ${IP}:8443 -u ${USER}
 
-oc login ${IP}:8443 -u $USER
+oc delete project $PROJECT
+oc new-project $PROJECT 2> /dev/null
+while [ $? \> 0 ]; do
+    sleep 1
+    printf "."
+oc new-project $PROJECT 2> /dev/null
+done
 
-oc new-project ${PROJECT}
-
-oc project $PROJECT
-
-oc new-app centos/python-35-centos7~https://github.com/justindav1s/openshift_chatbot.git
+oc new-app python:3.6~https://github.com/justindav1s/ai-on-openshift.git --context-dir=visionbot
