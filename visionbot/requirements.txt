@@ -2,6 +2,7 @@ absl-py==0.7.1
 astor==0.8.0
 Click==7.0
 Flask==1.1.1
+Flask-WTF==0.14.2
 gast==0.2.2
 google-pasta==0.1.7
 grpcio==1.22.0
@@ -25,3 +26,4 @@ tensorflow-estimator==1.14.0
 termcolor==1.1.0
 Werkzeug==0.15.5
 wrapt==1.11.2
+WTForms==2.2.1
