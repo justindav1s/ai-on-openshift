@@ -71,18 +71,6 @@ parameters:
 objects:
 
 # Jupyterhub configmap
-# - kind: ConfigMap
-#   apiVersion: v1
-#   metadata:
-#     name: "${APPLICATION_NAME}-cfg"
-#     labels:
-#       app: "${APPLICATION_NAME}"
-#   data:
-#     jupyterhub_config.py: "${JUPYTERHUB_CONFIG}"
-#     admin_users.txt: "${JUPYTERHUB_ADMIN_USERS}"
-#     user_whitelist.txt: "${JUPYTERHUB_ENROLLED_USERS}"
-
-# Jupyterhub configmap
 - kind: ConfigMap
   apiVersion: v1
   data:
