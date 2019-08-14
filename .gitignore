@@ -106,5 +106,5 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-/visionbot/app/allcnn_weights.hdf5
-/visionbot/app/allcnn_model.json
+/5_visionbot/app/allcnn_weights.hdf5
+/5_visionbot/app/allcnn_model.json
