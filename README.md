@@ -3,7 +3,7 @@
 ## Configuring Openshift to use GPUs
 
 
-## Building JUpypter notebooks capable of running AI/ML workloads using Tensorflow and GPUs
+## Building Jupyter notebooks capable of running AI/ML workloads using Tensorflow and GPUs
 
 
 ## Dploying Jupyter Notebooks at scale
