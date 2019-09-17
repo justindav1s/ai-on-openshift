@@ -15,10 +15,10 @@ parameters:
   value: keycloak
   required: true
 - name: NOTEBOOK_REPOSITORY_URL
-  value: https://github.com/jakevdp/PythonDataScienceHandbook
+  value: https://github.com/justindav1s/ai-on-openshift
   required: true
 - name: NOTEBOOK_REPOSITORY_CONTEXT_DIR
-  value: ''
+  value: 'nvidia-notebook/tensorflow-notebook'
 - name: NOTEBOOK_PYTHON_VERSION
   value: '3.5'
 - name: NOTEBOOK_REQUIREMENTS_TXT

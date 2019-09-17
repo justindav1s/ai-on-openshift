@@ -7,8 +7,6 @@ import urllib
 from urllib.error import HTTPError
 import allcnn_predict
 
-
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     print ("1");
