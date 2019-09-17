@@ -5,7 +5,7 @@
 APPLICATION_NAME="s2i-nvidia-notebook"
 SOURCE_REPOSITORY_URL="https://github.com/justindav1s/ai-on-openshift.git"
 SOURCE_REPOSITORY_REF="master"
-REPO_PATH="2_nvidia_jupyter_notebook_build/minimal-notebook"
+REPO_PATH="2_nvidia_jupyter_notebook_build/s2i-image/minimal-notebook"
 BASE_IMAGE="python-36-centos7-nvidia:latest"
 BASE_IMAGE_NS="jupyter-notebooks"
 
