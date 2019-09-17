@@ -9,21 +9,20 @@ import allcnn_predict
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    print ("1");
     form = URLForm()
     timg = Image(False, "", "", "")
     botError = BotError(False, "")
     if form.validate_on_submit():
         flash('Query=%s' %(form.query.data))
-        print ("2");
         url = form.query.data
         print ("url : "+url);
 
         try :
+            # resize image to 32x32 pixel image
             procImage = allcnn_predict.processImage(url)
+            # transform to 32,32,3 matrix, feed to model
             category, prob = allcnn_predict.predictImage(procImage)
-            print ("category : "+category);
-            print ("prob : "+prob);
+
             timg = Image(True, url, category, prob)
             timg.toString()
         except ValueError as e:
