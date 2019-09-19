@@ -1,2 +1,2 @@
-APP_SCRIPT=app.sh
+APP_SCRIPT=init.sh
 UPGRADE_PIP_TO_LATEST=yes
