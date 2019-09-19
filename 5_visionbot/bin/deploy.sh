@@ -18,6 +18,6 @@ done
 oc new-app -f deploy-template.yaml \
     -p APP_NAME=${APP} \
     -p GIT_URI=https://github.com/justindav1s/ai-on-openshift.git \
-    -p GIT_CONTEXT_DIR=5_visionbot
+    -p GIT_CONTEXT_DIR=5_visionbot/src
 
 oc start-build ${APP} --follow

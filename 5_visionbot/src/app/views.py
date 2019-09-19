@@ -13,7 +13,6 @@ def index():
     timg = Image(False, "", "", "")
     botError = BotError(False, "")
     if form.validate_on_submit():
-        #flash('Query=%s' %(form.query.data))
 
         url = form.query.data
 
