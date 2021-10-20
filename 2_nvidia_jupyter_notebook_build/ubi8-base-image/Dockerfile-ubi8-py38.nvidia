@@ -4,7 +4,7 @@ USER root
 
 RUN dnf update -y
 RUN dnf -y groupinstall "Development Tools"
-RUN dnf install -y pciutils dkms kernel-devel
+RUN dnf install -y kernel-devel
 RUN dnf install -y wget
 
 RUN yum clean all
