@@ -4,6 +4,8 @@
 
 oc login https://${OCP} -u $USER
 
+oc project $PROJECT
+
 oc delete project $PROJECT
 oc new-project $PROJECT 2> /dev/null
 while [ $? \> 0 ]; do
