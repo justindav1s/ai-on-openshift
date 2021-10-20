@@ -2,7 +2,7 @@
 
 . ./env.sh
 
-oc login https://${OCP}:8443 -u $USER
+oc login https://${OCP} -u $USER
 
 oc delete project $PROJECT
 oc new-project $PROJECT 2> /dev/null
