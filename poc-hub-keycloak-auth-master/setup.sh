@@ -21,9 +21,10 @@ cd templates
 oc new-app jupyterhub.yaml \
    -p NOTEBOOK_REPOSITORY_URL=https://github.com/justindav1s/ai-on-openshift \
    -p NOTEBOOK_REPOSITORY_CONTEXT_DIR=2_nvidia_jupyter_notebook_build/tensorflow-notebook \
-   -p NOTEBOOK_PYTHON_VERSION=latest
+   -p NOTEBOOK_PYTHON_VERSION=latest \
+   -p JUPYTERHUB_CONFIG='jupyterhub/.jupyter/jupyterhub_config.py'
 
 oc policy add-role-to-user system:image-puller system:serviceaccount:${PROJECT}:jupyterhub-hub -n ${NOTEBBOKS_NS}
-oc policy add-role-to-user system:image-puller system:serviceaccount:${PROJECT}:builder -n ${NOTEBBOKS_NS}
+oc policy add-role-to-user system:image-puller system:serviceaccount:${PROJECT}:builder 
 
 oc adm policy add-role-to-user cluster-admin -z jupyterhub-hub
