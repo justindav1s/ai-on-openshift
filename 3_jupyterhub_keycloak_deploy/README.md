@@ -1,11 +1,3 @@
-# Jupyterhub with Keycloak user management
-
-## Reference Documentation
-https://github.com/jupyter-on-openshift/poc-hub-keycloak-auth
-
-
-docker-registry.default.svc:5000/jupyter-notebooks/tensorflow-nvidia-notebook:latest
-
 JupyterHub (KeyCloak)
 =====================
 
@@ -35,26 +27,3 @@ Registering a user
 ------------------
 
 KeyCloak will be deployed, with JupyterHub and KeyCloak automatically configured to handle authentication of users. No users are setup in advance, but users can register themselves by clicking on the _Register_ link on the login page.
-
-
-
-```
-kind: ConfigMap
-apiVersion: v1
-data:
-  admin_users.txt: ''
-  jupyterhub_config.py: |-
-    c.KubeSpawner.privileged = True
-
-    c.Spawner.environment.update(dict(
-           NVIDIA_VISIBLE_DEVICES='all',
-           NVIDIA_DRIVER_CAPABILITIES='compute,utility',
-           NVIDIA_REQUIRE_CUDA='cuda>=8.0'))
-
-    c.KubeSpawner.extra_resource_limits = {'nvidia.com/gpu': '1'}
-  user_whitelist.txt: ''
-metadata:
-  labels:
-    app: jupyterhub
-  name: jupyterhub-cfg
-```
