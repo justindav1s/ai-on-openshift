@@ -1,8 +1,8 @@
-# Using Openshift to train and serve AI/ML models
+## Configuring Openshift 4 to use GPUs
 
+Start here :
 
-## Configuring Openshift to use GPUs
-
+https://docs.nvidia.com/datacenter/cloud-native/openshift/introduction.html
 
 ## Building Jupyter notebooks capable of running AI/ML workloads using Tensorflow and GPUs
 

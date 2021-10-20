@@ -1,0 +1,82 @@
+kind: Template
+apiVersion: v1
+metadata:
+  labels:
+    app: ${APPLICATION_NAME}
+  annotations:
+    description: An OpenShift template to build Docker images
+    tags: instant-app
+  name: "Docker build Template"
+objects:
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    tags:
+    - annotations:
+        description: ${APPLICATION_NAME} Docker image
+        tags: ${APPLICATION_NAME}
+      from:
+        kind: DockerImage
+        name: ${APPLICATION_NAME}:latest
+      importPolicy: {}
+      name: latest
+
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-docker-build"
+    labels:
+      app: "${APPLICATION_NAME}"
+  spec:
+    triggers:
+    - type: ImageChange
+      imageChange: {}
+    - type: ConfigChange
+    source:
+      type: Git
+      git:
+        uri: "${SOURCE_REPOSITORY_URL}"
+        ref: "${SOURCE_REPOSITORY_REF}"
+      contextDir: ${DOCKERFILE_PATH}
+    strategy:
+      dockerStrategy:
+        dockerfilePath: ${DOCKERFILE_NAME}
+        env:
+          - name: "DOCKERFILE_PATH"
+            value: "${DOCKERFILE_PATH}"
+    output:
+      to:
+        kind: "ImageStreamTag"
+        name: "${APPLICATION_NAME}:latest"
+    resources: {}
+    postCommit: {}
+    
+
+parameters:
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: grafeas
+- description: Git source URI for application
+  name: SOURCE_REPOSITORY_URL
+  value: "https://github.com/justindav1s/poc-hub-tensorflow-gpu.git"
+  required: true
+- description: Git branch/tag reference
+  name: SOURCE_REPOSITORY_REF
+  value: "master"
+  required: false
+- name: DOCKERFILE_PATH
+  displayName: Dockerfile path
+  description: Path within Git Repo wehere Dockerfile can be found.
+  value: "notebook"
+  required: false
+- name: DOCKERFILE_NAME
+  displayName: Dockerfile name
+  description: Name of Dockerfile.
+  value: "Dockerfile"
+  required: true
