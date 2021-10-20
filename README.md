@@ -6,6 +6,7 @@ https://docs.nvidia.com/datacenter/cloud-native/openshift/introduction.html
 
 ## Building Jupyter notebooks capable of running AI/ML workloads using Tensorflow and GPUs
 
+https://developer.nvidia.com/blog/streamlining-nvidia-driver-deployment-on-rhel-8-with-modularity-streams/
 
 ## Dploying Jupyter Notebooks at scale
 
