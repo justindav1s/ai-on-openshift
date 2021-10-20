@@ -135,7 +135,8 @@ objects:
         sourceStrategy:
           from:
             kind: ImageStreamTag
-            name: ${APPLICATION_NAME}-hub-s2i:latest
+            namespace: jupyter-notebooks
+            name: s2i-nvidia-notebook:latest
       output:
         to:
           kind: ImageStreamTag
@@ -323,11 +324,7 @@ objects:
               readinessProbe:
                 exec:
                   command:
-                    - /bin/sh
-                    - -i
-                    - -c
-                    - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d
-                      $POSTGRESQL_DATABASE -c 'SELECT 1'
+                    - /usr/libexec/check-container
               volumeMounts:
                 - mountPath: /var/lib/pgsql/data
                   name: data
@@ -346,7 +343,7 @@ objects:
               - postgresql
             from:
               kind: ImageStreamTag
-              name: postgresql:9.6
+              name: postgresql:10-el8
               namespace: openshift
           type: ImageChange
         - type: ConfigChange
@@ -616,11 +613,7 @@ objects:
               readinessProbe:
                 exec:
                   command:
-                    - /bin/sh
-                    - -i
-                    - -c
-                    - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d
-                      $POSTGRESQL_DATABASE -c 'SELECT 1'
+                    - /usr/libexec/check-container
               volumeMounts:
                 - mountPath: /var/lib/pgsql/data
                   name: data
@@ -639,7 +632,7 @@ objects:
               - postgresql
             from:
               kind: ImageStreamTag
-              name: postgresql:9.6
+              name: postgresql:10-el8
               namespace: openshift
           type: ImageChange
         - type: ConfigChange
