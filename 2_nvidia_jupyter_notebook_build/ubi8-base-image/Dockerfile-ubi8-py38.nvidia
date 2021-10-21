@@ -2,15 +2,15 @@ FROM registry.redhat.io/ubi8/python-38:latest
 
 USER root
 
-RUN dnf update -y
-RUN dnf -y groupinstall "Development Tools"
-RUN dnf install -y kernel-devel
-RUN dnf install -y wget
+# RUN dnf update -y
+# RUN dnf -y groupinstall "Development Tools"
+# RUN dnf install -y kernel-devel
+# RUN dnf install -y wget
 
 RUN dnf config-manager --add-repo=https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
 RUN dnf -y module install nvidia-driver:470
 
-RUN yum clean all
+RUN dnf clean all
 
 
 USER 1001
