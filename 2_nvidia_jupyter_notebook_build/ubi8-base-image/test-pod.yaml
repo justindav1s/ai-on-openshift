@@ -1,0 +1,29 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: gpu-shell
+  namespace: jupyter-notebooks
+  labels:
+    run: gpu-shell
+  annotations:
+spec:
+  restartPolicy: Always
+  serviceAccountName: default
+  schedulerName: default-scheduler
+  enableServiceLinks: true
+  terminationGracePeriodSeconds: 30
+  containers:
+    - resources:
+        limits:
+          nvidia.com/gpu: 1
+      stdin: true
+      terminationMessagePath: /dev/termination-log
+      stdinOnce: true
+      name: gpu-shell
+      imagePullPolicy: Always
+      terminationMessagePolicy: File
+      tty: true
+      image: 'quay.io/justindav1s/gpu-base:latest'
+      args:
+        - bash
+  serviceAccount: default
