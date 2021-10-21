@@ -14,6 +14,13 @@ oc project ${PROJECT}
 oc delete is ${APPLICATION_NAME}
 oc delete bc ${APPLICATION_NAME}-bc
 
+oc create secret docker-registry quayio-dockercfg \
+  --docker-server=${QUAYIO_HOST} \
+  --docker-username=${QUAYIO_USER} \
+  --docker-password=${QUAYIO_PASSWORD} \
+  --docker-email=${QUAYIO_EMAIL} \
+  -n ${PROJECT}
+
 oc process -f s2i-nvidia-notebook-bc.yaml \
   -p APPLICATION_NAME=${APPLICATION_NAME} \
   -p SOURCE_REPOSITORY_URL=${SOURCE_REPOSITORY_URL} \
