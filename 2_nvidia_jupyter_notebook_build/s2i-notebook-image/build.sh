@@ -29,3 +29,5 @@ oc process -f s2i-nvidia-notebook-bc.yaml \
   -p BASE_IMAGE=${BASE_IMAGE} \
   -p BASE_IMAGE_NS=${BASE_IMAGE_NS} \
   | oc apply -f -
+
+oc start-build ${APPLICATION_NAME}-bc -n ${PROJECT}
