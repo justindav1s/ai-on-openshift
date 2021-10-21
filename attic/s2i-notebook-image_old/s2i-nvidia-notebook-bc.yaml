@@ -7,6 +7,21 @@ metadata:
   name: s2i-docker-build-template
 objects:
 
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+    name: ${APPLICATION_NAME}
+  spec:
+    tags:
+      - annotations:
+          tags: ${APPLICATION_NAME}
+        from:
+          kind: DockerImage
+          name: ${APPLICATION_NAME}:latest
+        importPolicy: {}
+        name: latest
+
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
@@ -14,10 +29,8 @@ objects:
   spec:
     output:
       to:
-        kind: "DockerImage"
-        name: "quay.io/justindav1s/gpu-notebook-base:latest"
-      pushSecret:
-        name: quayio-dockercfg 
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
     postCommit: {}
     runPolicy: Serial
     source:
@@ -29,8 +42,9 @@ objects:
     strategy:
       sourceStrategy:
         from:
-          kind: "DockerImage"
-          name: "quay.io/justindav1s/gpu-base:latest"
+          kind: ImageStreamTag
+          name: ${BASE_IMAGE}
+          namespace: ${BASE_IMAGE_NS}
       type: Source
 
 parameters:
