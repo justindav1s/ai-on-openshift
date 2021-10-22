@@ -424,9 +424,8 @@ objects:
         type: Source
         sourceStrategy:
           from:
-            kind: ImageStreamTag
-            namespace: jupyter-notebooks
-            name: s2i-nvidia-notebook:latest
+          kind: "DockerImage"
+          name: quay.io/justindav1s/gpu-notebook-base:latest
           env:
             - name: JUPYTER_MASTER_FILES
               value: /opt/app-root/master
