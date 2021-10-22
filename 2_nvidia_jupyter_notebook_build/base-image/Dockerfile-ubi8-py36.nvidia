@@ -11,7 +11,7 @@ RUN dnf config-manager --add-repo=https://developer.download.nvidia.com/compute/
 RUN dnf -y module install nvidia-driver:470
 
 RUN dnf -y module reset nodejs
-RUN dnf -y module install nodejs:10
+RUN dnf -y module install nodejs:14
 
 RUN dnf clean all
 
