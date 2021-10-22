@@ -9,7 +9,7 @@ set -eo pipefail
 /opt/app-root/builder/assemble
 
 # Activate ipywidgets extension.
-
+pip install widgetsnbextension
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
 # Also activate ipywidgets/bokeh extension for JupyterLab.
