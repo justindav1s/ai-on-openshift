@@ -8,7 +8,7 @@ USER root
 # RUN dnf install -y wget
 
 RUN dnf config-manager --add-repo=https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
-RUN dnf -y module install nvidia-driver:470
+# RUN dnf -y module install nvidia-driver:470
 RUN dnf -y install cuda
 
 RUN dnf -y module reset nodejs
