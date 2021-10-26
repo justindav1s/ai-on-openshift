@@ -36,3 +36,4 @@ matplotlib
 pillow
 pandas
 opencv-python
+scipy
