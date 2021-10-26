@@ -35,4 +35,4 @@ tflearn
 matplotlib
 pillow
 pandas
-cv2
+opencv-python
