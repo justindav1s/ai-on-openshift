@@ -34,3 +34,5 @@ wrapt==1.12.1
 tflearn
 matplotlib
 pillow
+pandas
+cv2
