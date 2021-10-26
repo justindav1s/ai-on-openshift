@@ -15,3 +15,7 @@ oc new-app notebook-bc.yaml \
    -p NOTEBOOK_REPOSITORY_URL=https://github.com/justindav1s/ai-on-openshift \
    -p NOTEBOOK_REPOSITORY_CONTEXT_DIR=2_nvidia_jupyter_notebook_build/tensorflow-notebook \
    -p BASE_IMAGE=quay.io/justindav1s/gpu-notebook-base:latest
+
+sleep 5
+
+oc logs -f buildconfig/jupyterhub-nb-img
