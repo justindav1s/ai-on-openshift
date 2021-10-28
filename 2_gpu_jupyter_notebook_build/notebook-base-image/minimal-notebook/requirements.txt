@@ -64,3 +64,8 @@ wcwidth==0.2.5
 webencodings==0.5.1
 websocket-client==1.2.1
 jupyterhub
+
+jupyterlab-git
+jupyterlab-system-monitor
+python-lsp-server
+lckr-jupyterlab-variableinspector
