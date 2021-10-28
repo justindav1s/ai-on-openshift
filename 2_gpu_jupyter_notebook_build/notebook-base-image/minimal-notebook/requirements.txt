@@ -69,3 +69,4 @@ jupyterlab-git
 jupyterlab-system-monitor
 python-lsp-server
 lckr-jupyterlab-variableinspector
+jupyterlab-nvdashboard
