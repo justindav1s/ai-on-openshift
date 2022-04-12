@@ -2,10 +2,10 @@ FROM registry.redhat.io/ubi8/python-36:latest
 
 USER root
 
-# RUN dnf update -y
-# RUN dnf -y groupinstall "Development Tools"
-# RUN dnf install -y kernel-devel
-# RUN dnf install -y wget
+RUN dnf update -y
+RUN dnf -y groupinstall "Development Tools"
+RUN dnf install -y kernel-devel
+RUN dnf install -y wget
 
 # https://www.tensorflow.org/install/gpu#software_requirements
 # https://www.tensorflow.org/install/source#gpu
