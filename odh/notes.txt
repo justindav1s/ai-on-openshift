@@ -1,0 +1,8 @@
+
+
+docker tag quay.io/odh-jupyterhub/s2i-spark-minimal-notebook:py36-spark2.4.5-hadoop2.7.3 default-route-openshift-image-registry.apps.sno.openshiftlabs.net/opendatahub/s2i-spark-minimal-notebook:py36-spark2.4.5-hadoop2.7.3
+
+
+docker tag quay.io/odh-jupyterhub/s2i-spark-scipy-notebook:3.6 default-route-openshift-image-registry.apps.sno.openshiftlabs.net/opendatahub/s2i-spark-scipy-notebook:3.6
+
+docker push default-route-openshift-image-registry.apps.sno.openshiftlabs.net/opendatahub/s2i-spark-scipy-notebook:3.6

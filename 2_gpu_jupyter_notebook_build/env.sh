@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
 
-export IP=api.sno.openshiftlabs.net:6443
-export USER=justin
+export IP=${OCP_HOST}:${OCP_PORT}
+export USER=${OCP_USER}
 export PROJECT=jupyter-notebooks

@@ -1,0 +1,67 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  creationTimestamp: '2021-11-02T10:22:08Z'
+  finalizers:
+    - kfdef-finalizer.kfdef.apps.kubeflow.org
+  generation: 2
+  managedFields:
+    - apiVersion: kfdef.apps.kubeflow.org/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          .: {}
+          'f:applications': {}
+          'f:repos': {}
+          'f:version': {}
+      manager: Mozilla
+      operation: Update
+      time: '2021-11-02T10:22:08Z'
+    - apiVersion: kfdef.apps.kubeflow.org/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:metadata':
+          'f:finalizers':
+            .: {}
+            'v:"kfdef-finalizer.kfdef.apps.kubeflow.org"': {}
+        'f:status':
+          .: {}
+          'f:conditions': {}
+      manager: opendatahub-operator
+      operation: Update
+      time: '2021-11-02T10:22:52Z'
+  name: opendatahub
+  namespace: opendatahub
+  resourceVersion: '58109954'
+  uid: 8c1c1353-1f9e-4933-940c-ec46455312be
+spec:
+  applications:
+    - kustomizeConfig:
+        repoRef:
+          name: manifests
+          path: odh-common
+      name: odh-common
+    - kustomizeConfig:
+        repoRef:
+          name: manifests
+          path: radanalyticsio/spark/cluster
+      name: radanalyticsio-spark-cluster
+    - kustomizeConfig:
+        parameters:
+          - name: s3_endpoint_url
+            value: s3.odh.com
+        repoRef:
+          name: manifests
+          path: jupyterhub/jupyterhub
+      name: jupyterhub
+    - kustomizeConfig:
+        overlays:
+          - additional
+        repoRef:
+          name: manifests
+          path: jupyterhub/notebook-images
+      name: notebook-images
+  repos:
+    - name: manifests
+      uri: 'https://github.com/opendatahub-io/odh-manifests/tarball/v1.1.1'
+  version: v1.1.1-branch-openshift

@@ -1,6 +1,6 @@
 #/bin/bash
 
-oc login https://ocp.datr.eu:8443 -u justin
+oc login ${OCP_URL} -u ${OCP_USER} -p ${OCP_PASSWORD}
 
 oc delete project nvidia
 oc new-project nvidia 2> /dev/null
