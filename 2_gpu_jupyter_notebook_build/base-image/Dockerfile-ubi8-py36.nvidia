@@ -2,10 +2,10 @@ FROM registry.redhat.io/ubi8/python-36:latest
 
 USER root
 
-RUN dnf update -y
-RUN dnf -y groupinstall "Development Tools"
-RUN dnf install -y kernel-devel
-RUN dnf install -y wget
+# RUN dnf update -y
+# RUN dnf -y groupinstall "Development Tools"
+# RUN dnf install -y kernel-devel
+# RUN dnf install -y wget
 
 # https://www.tensorflow.org/install/gpu#software_requirements
 # https://www.tensorflow.org/install/source#gpu
@@ -14,11 +14,11 @@ RUN dnf install -y wget
 # RUN dnf -y module install nvidia-driver:470
 # RUN dnf -y install cuda-11-2-11.2.2-1 cuda-cupti-11-2-11.2.152-1 libcudnn8-8.1.1.33-1.cuda11.2 cuda-nvcc-11-2-11.2.152-1 nvidia-cuda-toolkit
 
-# RUN dnf -y module reset nodejs
-# RUN dnf -y module install nodejs:14
+RUN dnf -y module reset nodejs
+RUN dnf -y module install nodejs:14
 
 RUN dnf clean all
 
-ENV LD_LIBRARY_PATH /usr/local/cuda/lib64::/usr/local/cuda/extras/CUPTI/lib64
+# ENV LD_LIBRARY_PATH /usr/local/cuda/lib64::/usr/local/cuda/extras/CUPTI/lib64
 
 USER 1001
