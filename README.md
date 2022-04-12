@@ -17,7 +17,6 @@ https://developer.nvidia.com/blog/streamlining-nvidia-driver-deployment-on-rhel-
 ## Deploying and using AI/ML models on OPenshift
 
 
-
 # Sources
 
 https://github.com/kubeflow/kubeflow
