@@ -21,5 +21,5 @@ oc process -f docker-build-quay-template.yml \
     -p SOURCE_REPOSITORY_URL=${GIT_URL} \
     -p SOURCE_REPOSITORY_REF=master \
     -p DOCKERFILE_PATH=2_gpu_jupyter_notebook_build/base-image \
-    -p DOCKERFILE_NAME=Dockerfile-ubi8-py36.nvidia \
+    -p DOCKERFILE_NAME=Dockerfile-ubi8-py38.nvidia \
     | oc apply -n ${PROJECT} -f -
