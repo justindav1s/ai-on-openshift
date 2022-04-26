@@ -116,7 +116,7 @@ objects:
         - name: latest
           from:
             kind: DockerImage
-            name: quay.io/jupyteronopenshift/jupyterhub:3.3.1
+            name: quay.io/jupyteronopenshift/jupyterhub:3.4.0
   - kind: ImageStream
     apiVersion: image.openshift.io/v1
     metadata:
@@ -137,7 +137,7 @@ objects:
         type: Git
         git:
           uri: https://github.com/justindav1s/ai-on-openshift.git
-        contextDir: 3_jupyterhub_keycloak_deploy/jupyterhub
+        contextDir: 3.1_jupyterhub_keycloak_deploy/jupyterhub
       strategy:
         type: Source
         sourceStrategy:
@@ -456,7 +456,7 @@ objects:
         type: Git
         git:
           uri: https://github.com/justindav1s/ai-on-openshift.git
-        contextDir: 3_jupyterhub_keycloak_deploy/keycloak
+        contextDir: 3.1_jupyterhub_keycloak_deploy/keycloak
       strategy:
         type: Source
         dockerStrategy:
