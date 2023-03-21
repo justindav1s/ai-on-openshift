@@ -1,4 +1,4 @@
-notebook==5.7.8
+notebook==6.4.10
 jupyterhub==0.9.6;python_version>"2.7"
 jupyterlab==0.35.6;python_version>"2.7"
 jupyter_kernel_gateway==2.3.0
